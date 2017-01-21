@@ -16,3 +16,5 @@ keys
 .DS_Store
 .env
 npm-debug.log
+
+babel_cache

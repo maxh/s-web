@@ -66,16 +66,6 @@ const getProfile = (accessToken) => {
   });
 }
 
-const getScopes = (accessToken) => {
-  const INFO_URL = 'https://www.googleapis.com/oauth2/v3/tokeninfo';
-  const url = INFO_URL + '?access_token=' + accessToken;
-  return fetch(url).then(response => {
-    return response.json().then(json => {
-      return json.scope.split(' ');
-    });
-  });
-}
-
 
 const router = express.Router();
 
@@ -101,7 +91,9 @@ router.get('/callback', endpoint((req, res) => {
   const { code } = req.query;
 
   const tokensPromise = getTokensFromCode(code);
-  const scopesPromise = tokensPromise.then(tokens => getScopes(tokens.accessToken));
+  const scopesPromise = tokensPromise
+      .then(tokens => getTokenInfo(tokens.accessToken))
+      .then(tokenInfo => tokenInfo.scope.split(' '));
   const profilePromise = tokensPromise.then(tokens => getProfile(tokens.accessToken));
 
   const promises = Promise.all([tokensPromise, scopesPromise, profilePromise]);

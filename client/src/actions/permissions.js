@@ -1,6 +1,10 @@
+// Permission management across providers.
+
+
 import { CALL_API } from '../middleware/api';
 import * as types from './types';
 
+import settings from '../settings';
 
 const loadPermissions = () => ({
   [CALL_API]: {
@@ -14,6 +18,15 @@ const loadPermissions = () => ({
   },
 });
 
+const setPermission = (provider, providerInfo = {}) => {
+  const endpoint = settings.serverUrl + '/permissions/' + provider;
+  window.location = endpoint + '?onSuccess=/&onFailure=/';
+  return {
+    type: types.SET_PERMISSION_REQUEST
+  };
+};
+
 export {
+  setPermission,
   loadPermissions,
 };

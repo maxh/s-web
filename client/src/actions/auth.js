@@ -1,8 +1,9 @@
+// Initial user authentication.
+
 import cookie from 'cookie';
 
-import settings from '../../../settings';
+import settings from '../settings';
 import * as types from './types';
-
 
 
 const startSignIn = () => {
