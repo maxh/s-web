@@ -144,7 +144,7 @@ class Permissions extends Component {
     let inner;
     if (this.props.isLoading) {
       inner = 'Loading...';
-    } else if (this.props.permissions) {
+    } else if (this.props.permissions && this.props.permissions.possible) {
       const permissions = this.props.permissions;
       const possibleProviders = Object.keys(permissions.possible);
       inner = possibleProviders.map((provider) => {
@@ -173,7 +173,6 @@ Permissions.propTypes = {
   error: React.PropTypes.string,
   permissions: React.PropTypes.object,
   loadPermissions: React.PropTypes.func.isRequired,
-  setPermission: React.PropTypes.func.isRequired,
 };
 
 Permissions.defaultProps = {
