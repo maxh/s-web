@@ -11,9 +11,9 @@
     "client": "node start-client.js",
     "build-server": "webpack -d --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "node_modules/.bin/eslint server/* client/src/* || true",
-    "fix-lint": "node_modules/.bin/eslint --fix server/* client/src/* || true",
-    "lint-with-error": "node_modules/.bin/eslint server/* client/src/*"
+    "lint": "node_modules/.bin/eslint server/* client/src/* --quiet || true",
+    "fix-lint": "node_modules/.bin/eslint --fix server/* client/src/* --quiet || true",
+    "lint-with-error": "node_modules/.bin/eslint server/* client/src/* --quiet"
   },
   "author": "",
   "license": "ISC",
@@ -47,6 +47,7 @@
     "eslint-plugin-jsx-a11y": "^3.0.2",
     "eslint-plugin-react": "^6.9.0",
     "html-webpack-plugin": "^2.26.0",
+    "pre-commit": "^1.2.2",
     "webpack": "^1.14.0"
   }
 }

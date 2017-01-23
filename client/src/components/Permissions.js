@@ -173,7 +173,7 @@ Permissions.propTypes = {
   error: React.PropTypes.string,
   permissions: React.PropTypes.object,
   loadPermissions: React.PropTypes.func.isRequired,
-//  setPermission: React.PropTypes.func.isRequired,
+  setPermission: React.PropTypes.func.isRequired,
 };
 
 Permissions.defaultProps = {

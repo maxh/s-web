@@ -2,7 +2,7 @@ import express from 'express';
 import google from 'googleapis';
 
 import * as googleAuth from '../infra/google-auth';
-import { endpoint, fetchJson } from '../infra/net';
+import { endpoint } from '../infra/net';
 import settings from '../settings';
 
 
@@ -32,8 +32,9 @@ const getJwtPromise = (params) => {
     body: JSON.stringify(params),
     headers: { 'content-type': 'application/json' },
   };
-  return fetch(url, options, false).then(response => {
-    return response.json().then(json => {
+  // Use raw fetch instead of fetchJson to handle the NO_REFRESH_TOKEN case.
+  return fetch(url, options, false).then((response) => {
+    return response.json().then((json) => {
       if (!response.ok) {
         throw Error(json.error);  // Might be NO_REFRESH_TOKEN
       }
