@@ -2,8 +2,10 @@
 
 // We do this here instead of in scout-service because we cannot pass JWT to
 
-import * as express from 'express';
-import * as google from 'googleapis';
+import crypto from 'crypto';
+import express from 'express';
+import google from 'googleapis';
+import queryString from 'query-string';
 
 import * as googleAuth from '../infra/google-auth';
 import { endpoint, fetchJson } from '../infra/net';
@@ -55,6 +57,7 @@ router.get('/google', endpoint((req, res) => {
 
   req.session.destination = destination;
   req.session.jwt = req.cookies.jwt;
+  req.session.savedState = crypto.randomBytes(20).toString('hex');
 
   const scopes = JSON.parse(providerInfo).scopes;
 
@@ -69,13 +72,14 @@ router.get('/google', endpoint((req, res) => {
 
 // Note: Does NOT require an auth header.
 router.get('/callback/google', endpoint((req, res) => {
-  const { code, error } = req.query;
+  const { code, error, state } = req.query;
 
-  const { jwt, destination } = req.session;
+  const { jwt, destination, savedState } = req.session;
   req.session = null;
 
-  if (error) {
-    res.redirect(settings.clientServerUrl + destination);
+  const next = () => res.redirect(settings.clientServerUrl + destination);
+  if (error || savedState !== state) {
+    next();
   }
 
   const tokensPromise = getTokensFromCode(code);
@@ -94,10 +98,68 @@ router.get('/callback/google', endpoint((req, res) => {
     return setPermission(jwt, 'google', providerInfo);
   });
 
-  return permissionPromise.then(() => {
-    res.redirect(settings.clientServerUrl + destination);
-  });
+  return permissionPromise.then(next).catch(next);
 }));
 
+
+// Dropbox permissions.
+
+
+router.get('/dropbox', endpoint((req, res) => {
+  const { destination } = req.query;
+
+  req.session.destination = destination;
+  req.session.jwt = req.cookies.jwt;
+  req.session.savedState = crypto.randomBytes(20).toString('hex');
+
+  const params = {
+    client_id: settings.keys.dropbox_clientId,
+    redirect_uri: settings.serverUrl + redirectPath,
+    response_type: 'code',
+    state: req.session.state,
+  };
+  const stringified = queryString.stringify(params);
+  const url = `https://www.dropbox.com/1/oauth2/authorize?${stringified}`;
+
+  return res.redirect(url);
+}));
+
+// Note: Does NOT require an auth header.
+// TODO: Add localhost:3001/permissions/callback/dropbox as an authorized URI on
+// https://www.dropbox.com/developers/apps
+router.get('/callback/dropbox', endpoint((req, res) => {
+  const { code, state, error } = req.query;
+
+  const { jwt, destination, savedState } = req.session;
+  req.session = null;
+
+  const next = () => res.redirect(settings.clientServerUrl + destination);
+  if (error || savedState !== state) {
+    next();
+  }
+
+  const url = 'https://api.dropboxapi.com/1/oauth2/token';
+  const content = {
+    code,
+    grant_type: 'authorization_code',
+    client_id: settings.keys.dropbox_clientId,
+    client_secret: settings.keys.dropbox_clientSecret,
+  };
+  const options = {
+    body: JSON.stringify(content),
+    method: 'POST',
+  };
+
+  return fetchJson(url, options)
+      .then((token) => {
+        const providerInfo = {
+          accessToken: token.access_token,
+          accountId: token.account_id,
+        };
+        return setPermission(jwt, 'dropbox', providerInfo);
+      })
+      .then(next)
+      .catch(next);
+}));
 
 export default router;
