@@ -1,90 +1,101 @@
-import express from 'express';
-import google from 'googleapis';
+// Permissions for third-party services.
 
-import { endpoint } from '../infra/net';
-import settings from '../settings';
+// We do this here instead of in scout-service because we cannot pass JWT to
+
+import * as express from 'express';
+import * as google from 'googleapis';
+
+import * as googleAuth from '../infra/google-auth';
+import { endpoint, fetchJson } from '../infra/net';
+
+import settings from '../../settings';
 
 
 const OAuth2 = google.auth.OAuth2;
 
+
+// Permissions for third-party services.
+
+
 const router = express.Router();
 
 
-const setPermission = (provider, providerInfo) => {
-  const url = settings.scoutServiceUrl + '/permissions/' + provider;
-  params.scoutWebServerSecret = 'foo';
-  const options = {
-    method: 'POST',
-    body: JSON.stringify(providerInfo),
-    headers: {'content-type': 'application/json'},
+const setPermission = (jwt, provider, providerInfo) => {
+  const params = {
+    scoutWebServerSecret: 'foo',
+    provider,
+    providerInfo
   };
-  return fetch(url, options).then(response => {
-    return response.json().then(json => {
-      if (!response.ok) {
-        throw Error(json.error);
-      }
-      return json;
-    });
+  const options = {
+    method: 'PATCH',
+    body: JSON.stringify(params),
+    headers: {
+      'content-type': 'application/json',
+      'authorization': 'Scout JWT ' + jwt
+    },
+  }
+  const url = settings.scoutServiceUrl + '/api/permissions/';
+  return fetchJson(url, options).then(json => {
+    console.log(json);
   });
 };
 
 
-// Google.
+// Google permissions.
 
+
+const redirectPath = '/permissions/callback/google';
+const oauth2Client = new OAuth2(
+  settings.keys.google_clientId,
+  settings.keys.google_clientSecret,
+  settings.serverUrl + redirectPath,
+);
+const getTokensFromCode = googleAuth.getTokensFromCode(oauth2Client);
 
 router.get('/google', endpoint((req, res) => {
-  const { onSuccess, onFailure } = req.query;
-  req.session.onSuccess = onSuccess;
-  req.session.onFailure = onFailure;
+  const { destination, providerInfo } = req.query;
 
-  const { scopes } = req.params;
+  req.session.destination = destination;
+  req.session.jwt = req.cookies.jwt;
 
-  const redirectPath = '/permissions/google/callback';
-  const oauth2Client = new OAuth2(
-    settings.keys.googleClientId,
-    settings.keys.googleClientSecret,
-    settings.serverUrl + redirectPath,
-  );
+  const scopes = JSON.parse(providerInfo).scopes;
 
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
+    prompt: 'consent',
     scope: scopes
   });
 
   return res.redirect(url);
 }));
 
-router.get('/google/callback', endpoint((req, res) => {
+// Note: Does NOT require an auth header.
+router.get('/callback/google', endpoint((req, res) => {
   const { code } = req.query;
 
+  const { jwt, destination } = req.session;
+  req.session = null;
+
   const tokensPromise = getTokensFromCode(code);
-  const tokenInfoPromise = tokensPromise.then(tokens => getTokenInfo(tokens.accessToken));
+  const tokenInfoPromise = tokensPromise
+      .then(tokens => googleAuth.getTokenInfo(tokens.accessToken));
   const promises = Promise.all([ tokensPromise, tokenInfoPromise ]);
 
   const permissionPromise = promises.then((values) => {
     const [ tokens, tokenInfo ] = values;
     const providerInfo = {
-      googleId: profile.id,
-      scopes: tokenInfo.scopes.split(' '),
+      scopes: tokenInfo.scope.split(' '),
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       accessTokenExpiration: tokens.accessTokenExpiration,
     };
-    return setPermission('google', providerInfo);
+    return setPermission(jwt, 'google', providerInfo);
   });
 
-  const destinationPromise = permissionPromise.then(() => {
-    return req.session.onSuccess;
-  }).catch(error => {
-    return req.session.onFailure;
-  });
-
-  return destinationPromise.then((destination) => {
-    delete req.session.onSuccess;
-    delete req.session.onFailure;
-    const url = settings.clientServerUrl + destination;
-    res.redirect(url);
+  return permissionPromise.then(() => {
+    res.redirect(settings.clientServerUrl + destination);
   });
 }));
+
 
 export default router;

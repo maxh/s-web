@@ -22,7 +22,7 @@ const makeApiCall = (options) => {
   return fetch(url, fetchOptions)
     .then(response => response.json().then((json) => {
       if (!response.ok) {
-        return Promise.reject(json);
+        throw Error(json.error);
       }
       return Object.assign({}, json);
     }));

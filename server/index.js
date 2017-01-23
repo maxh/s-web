@@ -4,8 +4,10 @@ import cookieParser from 'cookie-parser';
 import cookieSession from 'cookie-session';
 import http from 'http';
 import path from 'path';
+import morgan from 'morgan';
 
 import auth from './routes/auth';
+import permissions from './routes/permissions';
 
 import settings from './settings';
 
@@ -13,7 +15,7 @@ import settings from './settings';
 const app = express();
 
 app.use(cookieParser());
-app.use(cookieSession({secret: settings.keys.session}));
+app.use(cookieSession({secret: settings.keys.scoutWebSessionKey}));
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static('client/build'));
@@ -30,9 +32,10 @@ const forceHttpsUnlessDev = (req, res, next) => {
 };
 app.use(forceHttpsUnlessDev);
 app.use(bodyParser.json());
-
+app.use(morgan('combined'));
 
 app.use('/auth', auth);
+app.use('/permissions', permissions);
 
 
 app.listen(settings.port, () => {

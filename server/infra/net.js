@@ -1,6 +1,6 @@
 // Networking utilities.
 
-import * as fetch from 'isomorphic-fetch';
+import 'isomorphic-fetch';
 
 
 // A handler wrapper that allows handlers to return promises
@@ -42,15 +42,6 @@ export const endpoint = (fn) => {
   return wrapper;
 };
 
-export const urlEncode = (data) => {
-  const parts = [];
-  for (const p in data) {
-    if (data.hasOwnProperty(p)) {
-      parts.push(encodeURIComponent(p) + '=' + encodeURIComponent(data[p]));
-    }
-  }
-  return parts.join('&');
-};
 
 export const fetchJson = (url, options) => {
   return fetch(url, options).then(response => {

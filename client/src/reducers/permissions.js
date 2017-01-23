@@ -23,7 +23,7 @@ function permissions(state = initialState, action) {
     case types.LOAD_PERMISSIONS_FAILURE:
       return {
         isLoading: false,
-        current: [],
+        current: null,
         error: action.error,
       };
     default:

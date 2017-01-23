@@ -134,7 +134,7 @@ class Permissions extends Component {
         });
       })
     } else {
-      inner = 'Error.';
+      inner = this.props.permissions.error || 'Error.';
     }
     return (
       <div>

@@ -2,6 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import { push } from 'react-router-redux'
 
+
 const requireAuth = (Component) => {
 
   class AuthenticatedComponent extends React.Component {
@@ -38,7 +39,7 @@ const requireAuth = (Component) => {
     }
 
     hasValidAuth(props) {
-      return props.auth.jwt;
+      return Boolean(props.auth.jwt);
     }
   }
 
