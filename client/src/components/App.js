@@ -21,7 +21,7 @@ const Main = (props) => {
 
 Main.propTypes = {
   location: React.PropTypes.object.isRequired,
-  children: React.PropTypes.array.isRequired,
+  children: React.PropTypes.object.isRequired,
 };
 
 

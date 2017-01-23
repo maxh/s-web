@@ -119,8 +119,12 @@ class DropboxDetail extends Component {
 }
 
 DropboxDetail.propTypes = {
-  granted: React.PropTypes.object.isRequired,
+  granted: React.PropTypes.object,
   setPermission: React.PropTypes.func.isRequired,
+};
+
+DropboxDetail.defaultProps = {
+  granted: undefined,
 };
 
 
@@ -166,10 +170,15 @@ class Permissions extends Component {
 
 Permissions.propTypes = {
   isLoading: React.PropTypes.bool.isRequired,
-  error: React.PropTypes.string.isRequired,
-  permissions: React.PropTypes.object.isRequired,
+  error: React.PropTypes.string,
+  permissions: React.PropTypes.object,
   loadPermissions: React.PropTypes.func.isRequired,
   setPermission: React.PropTypes.func.isRequired,
+};
+
+Permissions.defaultProps = {
+  error: undefined,
+  permissions: undefined,
 };
 
 

@@ -35,8 +35,8 @@ const requireAuth = (Component) => {
 
   AuthenticatedComponent.propTypes = {
     location: React.PropTypes.object.isRequired,
-    isAuthLoading: React.PropTypes.boolean.isRequired,
-    hasValidAuth: React.PropTypes.boolean.isRequired,
+    isAuthLoading: React.PropTypes.bool.isRequired,
+    hasValidAuth: React.PropTypes.bool.isRequired,
     push: React.PropTypes.func.isRequired,
   };
 

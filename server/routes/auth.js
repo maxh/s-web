@@ -21,16 +21,25 @@ const INITIAL_SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
 ];
 
+const NO_REFRESH_TOKEN = 'No refresh token!';
+
 
 const getJwtPromise = (params) => {
   const url = `${settings.scoutServiceUrl}/auth/jwt/fromtokens`;
-  params.scoutWebServerSecret = settings.scoutWebServerSecret;
+  params.scoutWebServerSecret = settings.keys.scoutWebServerSecret;
   const options = {
     method: 'POST',
     body: JSON.stringify(params),
     headers: { 'content-type': 'application/json' },
   };
-  return fetchJson(url, options).then(json => json.jwt);
+  return fetch(url, options, false).then(response => {
+    return response.json().then(json => {
+      if (!response.ok) {
+        throw Error(json.error);  // Might be NO_REFRESH_TOKEN
+      }
+      return json.jwt;
+    });
+  });
 };
 
 
@@ -50,13 +59,9 @@ router.get('/sign-in', endpoint((req, res) => {
 }));
 
 
-const NO_REFRESH_TOKEN = 'No refresh token!';
-
-
 router.get('/callback', endpoint((req, res) => {
   const { code } = req.query;
   const { destination } = req.session;
-  req.session = null;
 
   const tokensPromise = getTokensFromCode(code);
   const scopesPromise = tokensPromise
@@ -79,8 +84,10 @@ router.get('/callback', endpoint((req, res) => {
     return getJwtPromise(params);
   });
 
-  const donePromise = jwtPromise.then((jwt) => {
+  return jwtPromise.then((jwt) => {
+    res.session = null;
     res.cookie('jwt', jwt);
+    res.redirect(settings.clientServerUrl + destination);
   }).catch((error) => {
     if (error.message === NO_REFRESH_TOKEN) {
       const forceRefreshUrl = oauth2Client.generateAuthUrl({
@@ -88,13 +95,11 @@ router.get('/callback', endpoint((req, res) => {
         prompt: 'consent',
         scope: INITIAL_SCOPES,
       });
-      return res.redirect(forceRefreshUrl);
+      res.redirect(forceRefreshUrl);
     }
     // eslint-disable-next-line no-console
     console.error('Error signing in: ', error);
   });
-
-  return donePromise.then(() => res.redirect(settings.clientServerUrl + destination));
 }));
 
 export default router;
