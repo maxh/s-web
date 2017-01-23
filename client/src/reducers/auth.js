@@ -1,10 +1,13 @@
 import * as types from '../actions/types';
 
-const auth = (state = {
+const initialState = {
   isLoading: false,
   jwt: undefined,
   error: undefined,
-}, action) => {
+};
+
+
+const auth = (state = initialState, action) => {
   switch (action.type) {
     case types.AUTH_REQUEST:
       return {
@@ -27,6 +30,6 @@ const auth = (state = {
     default:
       return state;
   }
-}
+};
 
 export default auth;

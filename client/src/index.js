@@ -11,8 +11,8 @@ import App from './components/App';
 
 import { extractJwtFromCookie } from './actions/auth';
 
-import reducers from './reducers/index.js';
-import api from './middleware/api.js';
+import reducers from './reducers/index';
+import api from './middleware/api';
 
 import './style.css';
 
@@ -20,9 +20,9 @@ import './style.css';
 const store = createStore(
   combineReducers({
     ...reducers,
-    routing: routerReducer
+    routing: routerReducer,
   }),
-  applyMiddleware(thunk, api, routerMiddleware(browserHistory))
+  applyMiddleware(thunk, api, routerMiddleware(browserHistory)),
 );
 
 const history = syncHistoryWithStore(browserHistory, store);
@@ -33,5 +33,5 @@ ReactDOM.render(
   <Provider store={store}>
     <App history={history} />
   </Provider>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );

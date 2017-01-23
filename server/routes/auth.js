@@ -23,12 +23,12 @@ const INITIAL_SCOPES = [
 
 
 const getJwtPromise = (params) => {
-  const url = settings.scoutServiceUrl + '/auth/jwt/fromtokens';
+  const url = `${settings.scoutServiceUrl}/auth/jwt/fromtokens`;
   params.scoutWebServerSecret = settings.scoutWebServerSecret;
   const options = {
     method: 'POST',
     body: JSON.stringify(params),
-    headers: {'content-type': 'application/json'},
+    headers: { 'content-type': 'application/json' },
   };
   return fetchJson(url, options).then(json => json.jwt);
 };
@@ -43,7 +43,7 @@ router.get('/sign-in', endpoint((req, res) => {
 
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: INITIAL_SCOPES
+    scope: INITIAL_SCOPES,
   });
 
   return res.redirect(url);
@@ -67,33 +67,34 @@ router.get('/callback', endpoint((req, res) => {
 
   const promises = Promise.all([tokensPromise, scopesPromise, profilePromise]);
 
-  const jwtPromise = promises.then(values => {
-    const [ tokens, scopes, profile ] = values;
+  const jwtPromise = promises.then((values) => {
+    const [tokens, scopes, profile] = values;
     const params = {
       googleId: profile.id,
       email: profile.emails[0].value,
       name: profile.displayName,
       scopes,
-      tokens
-    }
+      tokens,
+    };
     return getJwtPromise(params);
   });
 
-  const donePromise = jwtPromise.then(jwt => {
+  const donePromise = jwtPromise.then((jwt) => {
     res.cookie('jwt', jwt);
-  }).catch(error => {
+  }).catch((error) => {
     if (error.message === NO_REFRESH_TOKEN) {
       const forceRefreshUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         prompt: 'consent',
-        scope: INITIAL_SCOPES
+        scope: INITIAL_SCOPES,
       });
       return res.redirect(forceRefreshUrl);
     }
+    // eslint-disable-next-line no-console
     console.error('Error signing in: ', error);
   });
 
-  return donePromise.then(() => res.redirect(destination));
+  return donePromise.then(() => res.redirect(settings.clientServerUrl + destination));
 }));
 
 export default router;

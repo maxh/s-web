@@ -8,9 +8,8 @@ import 'isomorphic-fetch';
 // rejection and error handling and attaches convenience methods.
 export const endpoint = (fn) => {
   const wrapper = (req, res) => {
-
     // Attach a convenience function to send a JSON client error.
-    res.sendClientError = message => {
+    res.sendClientError = (message) => {  // eslint-disable-line no-param-reassign
       return res.status(400).json({ error: message });
     };
 
@@ -24,14 +23,15 @@ export const endpoint = (fn) => {
     });
 
     // Ensure a response is sent.
-    promise.then(result => {
+    promise.then((result) => {
       if (!res.headersSent) {
         if (!result) {
           result = {};  // Empty response => success!
         }
         return res.status(200).json(result);
       }
-    }).catch(error => {
+    }).catch((error) => {
+      // eslint-disable-next-line no-console
       console.error('Error in handler:\n', error);
       if (!res.headersSent) {
         return res.status(500).send({ error: 'Internal server error.' });
@@ -44,14 +44,14 @@ export const endpoint = (fn) => {
 
 
 export const fetchJson = (url, options) => {
-  return fetch(url, options).then(response => {
+  return fetch(url, options).then((response) => {
     if (!response.ok) {
       throw Error(
-        `Network request failed!\n` +
+        'Network request failed!\n' +
         `URL: ${url}\n` +
         `Options: ${JSON.stringify(options)}\n` +
         `Status code: ${response.status}\n` +
-        `Status text: ${response.statusText}\n`
+        `Status text: ${response.statusText}\n`,
       );
     }
     return response.json();

@@ -19,13 +19,11 @@ const loadPermissions = () => ({
 });
 
 const setPermission = (provider, providerInfo = {}) => {
-  const endpoint = settings.serverUrl + '/permissions/' + provider;
+  const endpoint = `${settings.serverUrl}/permissions/${provider}`;
   const serialized = encodeURIComponent(JSON.stringify(providerInfo));
-  const url = endpoint + '?destination=/&providerInfo=' + serialized;
+  const url = `${endpoint}?destination=/&providerInfo=${serialized}`;
   window.location = url;
-  return {
-    type: types.SET_PERMISSION_REQUEST
-  };
+  return { type: types.SET_PERMISSION_REQUEST };
 };
 
 export {

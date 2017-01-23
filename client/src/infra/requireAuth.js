@@ -1,53 +1,55 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import { push } from 'react-router-redux'
+import { connect } from 'react-redux';
+import { push } from 'react-router-redux';
 
 
 const requireAuth = (Component) => {
-
   class AuthenticatedComponent extends React.Component {
 
     componentWillMount() {
-      this.redirectIfNoAuth(this.props)
+      this.redirectIfNoAuth(this.props);
     }
 
     componentWillReceiveProps(nextProps) {
-      this.redirectIfNoAuth(nextProps)
-    }
-
-    render() {
-      return (
-        <div>
-          {this.hasValidAuth(this.props)
-            ? <Component />
-            : null
-          }
-        </div>
-      )
+      this.redirectIfNoAuth(nextProps);
     }
 
     redirectIfNoAuth(props) {
-      if (this.isAuthLoading(props) || this.hasValidAuth(props)) {
+      if (props.isAuthLoading || props.hasValidAuth) {
         return;
       }
-      const nextPath = this.props.location.pathname
-      this.props.dispatch(push(`/sign-in?next=${nextPath}`));
+      const nextPath = this.props.location.pathname;
+      this.props.push(`/sign-in?next=${nextPath}`);
     }
 
-    isAuthLoading(props) {
-      return props.auth.isLoading;
-    }
-
-    hasValidAuth(props) {
-      return Boolean(props.auth.jwt);
+    render() {
+      let inner = null;
+      if (this.props.hasValidAuth) {
+        inner = <Component />;
+      } else if (this.props.isAuthLoading) {
+        inner = 'Loading...';
+      }
+      return <div>{inner}</div>;
     }
   }
 
-  const mapStateToProps = (state) => {
-    return { auth: state.auth };
-  }
+  AuthenticatedComponent.propTypes = {
+    location: React.PropTypes.object.isRequired,
+    isAuthLoading: React.PropTypes.boolean.isRequired,
+    hasValidAuth: React.PropTypes.boolean.isRequired,
+    push: React.PropTypes.func.isRequired,
+  };
 
-  return connect(mapStateToProps)(AuthenticatedComponent)
+  const mapStateToProps = state => ({
+    isAuthLoading: state.auth.isLoading,
+    hasValidAuth: Boolean(state.auth.jwt),
+  });
+
+  const mapDispatchToProps = dispatch => ({
+    push: path => dispatch(push(path)),
+  });
+
+  return connect(mapStateToProps, mapDispatchToProps)(AuthenticatedComponent);
 };
 
 

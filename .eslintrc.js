@@ -1,29 +1,32 @@
 module.exports = {
-  "extends": "airbnb",
   "plugins": [
     "react",
     "jsx-a11y",
     "import",
-    "react-native"
+    "css-modules",
+  ],
+  "extends": [
+    "airbnb",
+    "plugin:css-modules/recommended"
   ],
   "parser": "babel-eslint",
   "rules": {
+    "consistent-return": 0,
+    "no-param-reassign": 0,
     "arrow-body-style": 0,
     "import/prefer-default-export": 0,
-    "react/forbid-prop-types": [0, {"forbid": "any"}],
-    "react-native/no-unused-styles": 2,
-    "react-native/split-platform-components": 2,
-    "react-native/no-inline-styles": 2,
-    "react-native/no-color-literals": 2,
     "react/jsx-filename-extension": 0,
+    "react/forbid-prop-types": [0, {"forbid": "any"}],
     "no-unused-vars": ["error", {
       "argsIgnorePattern": "(dispatch|getState|state)"
-    }]
+    }],
+    "no-multiple-empty-lines": [2, {"max": 2}],
   },
   "globals": {
-    "__DEV__": true,
     "fetch": true,
     "Headers": true,
-    "WebSocket": true
+    "document": true,
+    "window": true,
+    "atob": true
   }
 };

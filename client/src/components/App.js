@@ -7,6 +7,7 @@ import SignIn from './SignIn';
 
 import requireAuth from '../infra/requireAuth';
 
+
 const Main = (props) => {
   return (
     <div className={props.location.pathname}>
@@ -16,11 +17,18 @@ const Main = (props) => {
       </div>
     </div>
   );
-}
+};
+
+Main.propTypes = {
+  location: React.PropTypes.object.isRequired,
+  children: React.PropTypes.array.isRequired,
+};
+
 
 const NotFound = () => {
-  return <div>Oops! We couldn't find that page.</div>;
-}
+  return <div>{'Oops! We couldn\'t find that page.'}</div>;
+};
+
 
 const App = (props) => {
   return (
@@ -28,11 +36,15 @@ const App = (props) => {
       <Route path="/" component={Main}>
         <IndexRoute component={requireAuth(Permissions)} />
         <Route path="/sign-in" component={SignIn} />
-        <Route path='/404' component={NotFound} />
-        <Redirect from='*' to='/404' />
+        <Route path="/404" component={NotFound} />
+        <Redirect from="*" to="/404" />
       </Route>
     </Router>
   );
-}
+};
+
+App.propTypes = {
+  history: React.PropTypes.object.isRequired,
+};
 
 export default App;

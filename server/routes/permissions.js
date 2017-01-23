@@ -24,20 +24,18 @@ const setPermission = (jwt, provider, providerInfo) => {
   const params = {
     scoutWebServerSecret: 'foo',
     provider,
-    providerInfo
+    providerInfo,
   };
   const options = {
     method: 'PATCH',
     body: JSON.stringify(params),
     headers: {
       'content-type': 'application/json',
-      'authorization': 'Scout JWT ' + jwt
+      authorization: `Scout JWT ${jwt}`,
     },
-  }
-  const url = settings.scoutServiceUrl + '/api/permissions/';
-  return fetchJson(url, options).then(json => {
-    console.log(json);
-  });
+  };
+  const url = `${settings.scoutServiceUrl}/api/permissions/`;
+  return fetchJson(url, options).then(() => ({}));
 };
 
 
@@ -63,7 +61,7 @@ router.get('/google', endpoint((req, res) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
-    scope: scopes
+    scope: scopes,
   });
 
   return res.redirect(url);
@@ -79,10 +77,10 @@ router.get('/callback/google', endpoint((req, res) => {
   const tokensPromise = getTokensFromCode(code);
   const tokenInfoPromise = tokensPromise
       .then(tokens => googleAuth.getTokenInfo(tokens.accessToken));
-  const promises = Promise.all([ tokensPromise, tokenInfoPromise ]);
+  const promises = Promise.all([tokensPromise, tokenInfoPromise]);
 
   const permissionPromise = promises.then((values) => {
-    const [ tokens, tokenInfo ] = values;
+    const [tokens, tokenInfo] = values;
     const providerInfo = {
       scopes: tokenInfo.scope.split(' '),
       accessToken: tokens.accessToken,

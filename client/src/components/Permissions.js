@@ -4,13 +4,10 @@ import {
   FormGroup,
   HelpBlock,
   ControlLabel,
-  Button
+  Button,
 } from 'react-bootstrap';
 import { connect } from 'react-redux';
-import { loadPermissions, setPermission } from '../actions/permissions'
-
-
-import settings from '../settings';
+import { loadPermissions, setPermission } from '../actions/permissions';
 
 
 class GoogleDetail extends Component {
@@ -18,13 +15,23 @@ class GoogleDetail extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedScopes: new Set()
+      selectedScopes: new Set(),
     };
     this.initialScopes = new Set(props.granted.scopes);
+    this.setPermission = this.setPermission.bind(this);
   }
 
   componentWillMount() {
     this.setState({ selectedScopes: new Set(this.props.granted.scopes) });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ selectedScopes: new Set(nextProps.granted.scopes) });
+  }
+
+  setPermission() {
+    const scopes = Array.from(this.state.selectedScopes);
+    this.props.setPermission('google', { scopes });
   }
 
   toggleScope(scope) {
@@ -34,7 +41,23 @@ class GoogleDetail extends Component {
     } else {
       selectedScopes.add(scope);
     }
-    this.setState({ selectedScopes:  selectedScopes });
+    this.setState({ selectedScopes });
+  }
+
+  renderScopes(possible) {
+    return possible.scopes.map((scope) => {
+      const toggleScope = this.toggleScope.bind(this, scope);
+      return (
+        <Checkbox
+          key={`checkbox-${scope}`}
+          checked={this.state.selectedScopes.has(scope)}
+          disabled={this.initialScopes.has(scope)}
+          onChange={toggleScope}
+        >
+          {scope}
+        </Checkbox>
+      );
+    });
   }
 
   render() {
@@ -42,44 +65,36 @@ class GoogleDetail extends Component {
       <FormGroup controlId="google">
         <ControlLabel>Google</ControlLabel>
         <HelpBlock>Specify the scopes to enable:</HelpBlock>
-          { this.renderScopes(this.props.possible, this.props.granted) }
-        <Button onClick={ this.setPermission.bind(this) }>Apply</Button>
+        {this.renderScopes(this.props.possible)}
+        <Button onClick={this.setPermission}>Apply</Button>
       </FormGroup>
     );
   }
-
-  setPermission() {
-    const scopes = [];
-    for (const scope of this.state.selectedScopes) {
-      scopes.push(scope);
-    }
-    this.props.setPermission('google', { scopes });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({ selectedScopes: new Set(nextProps.granted.scopes) });
-  }
-
-  renderScopes(possible, granted) {
-    return possible.scopes.map(scope => {
-      return (
-        <Checkbox
-          key={'checkbox' + scope}
-          checked={this.state.selectedScopes.has(scope)}
-          disabled={this.initialScopes.has(scope)}
-          onChange={this.toggleScope.bind(this, scope)}>
-          {scope}
-        </Checkbox>
-      );
-    });
-  }
 }
 
+GoogleDetail.propTypes = {
+  granted: React.PropTypes.object.isRequired,
+  possible: React.PropTypes.object.isRequired,
+  setPermission: React.PropTypes.func.isRequired,
+};
+
+
+// eslint-disable-next-line react/no-multi-comp
 class DropboxDetail extends Component {
 
   constructor(props) {
     super(props);
     this.state = { enabled: Boolean(props.granted) };
+    this.setPermission = this.setPermission.bind(this);
+    this.toggleEnabled = this.toggleEnabled.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({ enabled: Boolean(nextProps.granted) });
+  }
+
+  setPermission() {
+    this.props.setPermission('dropbox', {});
   }
 
   toggleEnabled() {
@@ -91,24 +106,23 @@ class DropboxDetail extends Component {
       <FormGroup controlId="google">
         <ControlLabel>Dropbox</ControlLabel>
         <Checkbox
-            checked={this.enabled}
-            disabled={this.enabled}
-            onChange={this.toggleEnabled.bind(this)}>
+          checked={this.enabled}
+          disabled={this.enabled}
+          onChange={this.toggleEnabled}
+        >
           Scout has access
         </Checkbox>
-        <Button onClick={ this.setPermission.bind(this) }>Apply</Button>
+        <Button onClick={this.setPermission}>Apply</Button>
       </FormGroup>
     );
   }
-
-  setPermission() {
-    this.props.setPermission('dropbox', {});
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({ enabled: Boolean(nextProps.granted) });
-  }
 }
+
+DropboxDetail.propTypes = {
+  granted: React.PropTypes.object.isRequired,
+  setPermission: React.PropTypes.func.isRequired,
+};
+
 
 const componentsByProvider = {
   google: GoogleDetail,
@@ -116,15 +130,20 @@ const componentsByProvider = {
 };
 
 
+// eslint-disable-next-line react/no-multi-comp
 class Permissions extends Component {
+  componentDidMount() {
+    this.props.loadPermissions();
+  }
+
   render() {
     let inner;
-    if (this.props.permissions.isLoading) {
+    if (this.props.isLoading) {
       inner = 'Loading...';
-    } else if (this.props.permissions.current) {
-      const permissions = this.props.permissions.current;
+    } else if (this.props.permissions) {
+      const permissions = this.props.permissions;
       const possibleProviders = Object.keys(permissions.possible);
-      inner = possibleProviders.map(provider => {
+      inner = possibleProviders.map((provider) => {
         const component = componentsByProvider[provider];
         return React.createElement(component, {
           key: provider + Date.now(),
@@ -132,9 +151,9 @@ class Permissions extends Component {
           granted: permissions.granted[provider],
           setPermission: this.props.setPermission,
         });
-      })
+      });
     } else {
-      inner = this.props.permissions.error || 'Error.';
+      inner = this.props.error || 'Error.';
     }
     return (
       <div>
@@ -143,20 +162,26 @@ class Permissions extends Component {
       </div>
     );
   }
-
-  componentDidMount() {
-    this.props.loadPermissions();
-  }
-
 }
 
+Permissions.propTypes = {
+  isLoading: React.PropTypes.bool.isRequired,
+  error: React.PropTypes.string.isRequired,
+  permissions: React.PropTypes.object.isRequired,
+  loadPermissions: React.PropTypes.func.isRequired,
+  setPermission: React.PropTypes.func.isRequired,
+};
+
+
 const mapStateToProps = state => ({
-  permissions: state.permissions
+  isLoading: state.permissions.isLoading,
+  error: state.permissions.error,
+  permissions: state.permissions.current,
 });
 
 const mapDispatchToProps = {
   loadPermissions,
-  setPermission
+  setPermission,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Permissions);
