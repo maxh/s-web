@@ -144,7 +144,8 @@ class Permissions extends Component {
     let inner;
     if (this.props.isLoading) {
       inner = 'Loading...';
-    } else if (this.props.permissions && this.props.permissions.possible) {
+    } else if (this.props.permissions &&
+               Object.keys(this.props.permissions.granted).length) {
       const permissions = this.props.permissions;
       const possibleProviders = Object.keys(permissions.possible);
       inner = possibleProviders.map((provider) => {

@@ -22,7 +22,7 @@ const router = express.Router();
 
 const setPermission = (jwt, provider, providerInfo) => {
   const params = {
-    scoutWebServerSecret: 'foo',
+    scoutWebServerSecret: settings.keys.scoutWebServerSecret,
     provider,
     providerInfo,
   };
@@ -69,10 +69,14 @@ router.get('/google', endpoint((req, res) => {
 
 // Note: Does NOT require an auth header.
 router.get('/callback/google', endpoint((req, res) => {
-  const { code } = req.query;
+  const { code, error } = req.query;
 
   const { jwt, destination } = req.session;
   req.session = null;
+
+  if (error) {
+    res.redirect(settings.clientServerUrl + destination);
+  }
 
   const tokensPromise = getTokensFromCode(code);
   const tokenInfoPromise = tokensPromise
