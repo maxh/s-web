@@ -13,7 +13,11 @@ const deleteCookie = (name) => {
 };
 
 const startSignIn = () => {
-  window.location = `${settings.serverUrl}/auth/sign-in?destination=/`;
+  let url = '/auth/sign-in?destination=/';
+  if (settings.isDev) {
+    url = settings.serverUrl + url;
+  }
+  window.location = url;
   return { type: types.AUTH_REQUEST };
 };
 
