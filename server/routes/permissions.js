@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import express from 'express';
 import google from 'googleapis';
 import queryString from 'query-string';
+import request from 'request';
 
 import * as googleAuth from '../infra/google-auth';
 import { endpoint, fetchJson } from '../infra/net';
@@ -65,6 +66,7 @@ router.get('/google', endpoint((req, res) => {
     access_type: 'offline',
     prompt: 'consent',
     scope: scopes,
+    state: req.session.savedState,
   });
 
   return res.redirect(url);
@@ -104,7 +106,7 @@ router.get('/callback/google', endpoint((req, res) => {
 
 // Dropbox permissions.
 
-
+const dropboxRedirectUri = `${settings.serverUrl}/permissions/callback/dropbox`;
 router.get('/dropbox', endpoint((req, res) => {
   const { destination } = req.query;
 
@@ -114,43 +116,50 @@ router.get('/dropbox', endpoint((req, res) => {
 
   const params = {
     client_id: settings.keys.dropbox_clientId,
-    redirect_uri: settings.serverUrl + redirectPath,
+    redirect_uri: dropboxRedirectUri,
     response_type: 'code',
-    state: req.session.state,
+    state: req.session.savedState,
   };
   const stringified = queryString.stringify(params);
-  const url = `https://www.dropbox.com/1/oauth2/authorize?${stringified}`;
+  const url = `https://www.dropbox.com/oauth2/authorize?${stringified}`;
 
   return res.redirect(url);
 }));
 
 // Note: Does NOT require an auth header.
-// TODO: Add localhost:3001/permissions/callback/dropbox as an authorized URI on
-// https://www.dropbox.com/developers/apps
 router.get('/callback/dropbox', endpoint((req, res) => {
   const { code, state, error } = req.query;
 
   const { jwt, destination, savedState } = req.session;
   req.session = null;
 
-  const next = () => res.redirect(settings.clientServerUrl + destination);
+  const destinationUrl = settings.clientServerUrl + destination;
   if (error || savedState !== state) {
-    next();
+    res.redirect(destinationUrl);
   }
 
-  const url = 'https://api.dropboxapi.com/1/oauth2/token';
-  const content = {
-    code,
-    grant_type: 'authorization_code',
-    client_id: settings.keys.dropbox_clientId,
-    client_secret: settings.keys.dropbox_clientSecret,
-  };
-  const options = {
-    body: JSON.stringify(content),
-    method: 'POST',
-  };
 
-  return fetchJson(url, options)
+  const tokenPromise = new Promise((resolve, reject) => {
+    request.post('https://api.dropbox.com/1/oauth2/token', {
+      form: {
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: dropboxRedirectUri,
+      },
+      auth: {
+        user: settings.keys.dropbox_clientId,
+        pass: settings.keys.dropbox_clientSecret,
+      },
+    }, (reqError, response, body) => {
+      if (reqError) {
+        reject(reqError);
+        return;
+      }
+      resolve(JSON.parse(body));
+    });
+  });
+
+  return tokenPromise
       .then((token) => {
         const providerInfo = {
           accessToken: token.access_token,
@@ -158,8 +167,8 @@ router.get('/callback/dropbox', endpoint((req, res) => {
         };
         return setPermission(jwt, 'dropbox', providerInfo);
       })
-      .then(next)
-      .catch(next);
+      .then(() => res.redirect(destinationUrl))
+      .catch(err => res.redirect(`${destinationUrl}?error=${err}`));
 }));
 
 export default router;

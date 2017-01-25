@@ -45,15 +45,11 @@ export const endpoint = (fn) => {
 
 export const fetchJson = (url, options) => {
   return fetch(url, options).then((response) => {
-    if (!response.ok) {
-      throw Error(
-        'Network request failed!\n' +
-        `URL: ${url}\n` +
-        `Options: ${JSON.stringify(options)}\n` +
-        `Status code: ${response.status}\n` +
-        `Status text: ${response.statusText}\n`,
-      );
-    }
-    return response.json();
+    return response.json().then((json) => {
+      if (!response.ok) {
+        throw Error(JSON.stringify(json));
+      }
+      return json;
+    });
   });
 };

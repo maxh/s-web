@@ -15,7 +15,7 @@ const app = express();
 app.use(cookieParser());
 app.use(cookieSession({ secret: settings.keys.scoutWebSessionKey }));
 
-if (process.env.NODE_ENV === 'production') {
+if (true || process.env.NODE_ENV === 'production') {
   app.use(express.static('client/build'));
 }
 
@@ -33,7 +33,6 @@ app.use(morgan('combined'));
 
 app.use('/auth', auth);
 app.use('/permissions', permissions);
-
 
 app.listen(settings.port, () => {
   // eslint-disable-next-line no-console

@@ -106,8 +106,8 @@ class DropboxDetail extends Component {
       <FormGroup controlId="google">
         <ControlLabel>Dropbox</ControlLabel>
         <Checkbox
-          checked={this.enabled}
-          disabled={this.enabled}
+          checked={this.state.enabled}
+          disabled={this.state.enabled}
           onChange={this.toggleEnabled}
         >
           Scout has access

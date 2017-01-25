@@ -7,7 +7,8 @@ if (process.env.NODE_ENV === 'production' ||
   settings.clientServerUrl = settings.serverUrl;
   settings.scoutServiceUrl = 'https://scout-service.herokuapp.com';
 } else {
-  settings.serverUrl = 'http://localhost:3001';
+  settings.port = 3001;
+  settings.serverUrl = 'http://localhost:' + settings.port;
   settings.clientServerUrl = 'http://localhost:3000';  // React's dev server uses different port.
   settings.scoutServiceUrl = 'http://localhost:5000';
 }
