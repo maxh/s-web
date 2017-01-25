@@ -15,13 +15,12 @@ const app = express();
 app.use(cookieParser());
 app.use(cookieSession({ secret: settings.keys.scoutWebSessionKey }));
 
-if (true || process.env.NODE_ENV === 'production') {
+if (!settings.isDev) {
   app.use(express.static('client/build'));
 }
 
 const forceHttpsUnlessDev = (req, res, next) => {
-  if ((process.env.NODE_ENV === 'production' ||
-       process.env.NODE_ENV === 'staging') &&
+  if (!settings.isDev && settings.isHeroku &&
       req.header('x-forwarded-proto') !== 'https') {
     return res.redirect(`https://${req.header('host')}${req.url}`);
   }

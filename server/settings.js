@@ -1,8 +1,7 @@
 import settings from '../settings';
 
 
-if (process.env.NODE_ENV === 'production' ||
-    process.env.NODE_ENV === 'staging') {
+if (process.env.AUTH_KEYS) {
   settings.keys = JSON.parse(process.env.AUTH_KEYS);
 } else {
   // eslint-disable-next-line global-require
