@@ -6,6 +6,10 @@ node_modules
 # testing
 coverage
 
+# production
+!client/build
+build
+
 # secrets
 keys
 

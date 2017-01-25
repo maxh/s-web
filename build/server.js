@@ -370,12 +370,7 @@ require("source-map-support").install();
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	if (_settings2.default.isHeroku) {
-	  _settings2.default.keys = JSON.parse(process.env.AUTH_KEYS);
-	} else {
-	  // eslint-disable-next-line global-require
-	  _settings2.default.keys = __webpack_require__(/*! ../keys/keys.json */ 11);
-	}
+	_settings2.default.keys = JSON.parse(process.env.AUTH_KEYS);
 	
 	exports.default = _settings2.default;
 
@@ -415,27 +410,7 @@ require("source-map-support").install();
 
 
 /***/ },
-/* 11 */
-/*!************************!*\
-  !*** ./keys/keys.json ***!
-  \************************/
-/***/ function(module, exports) {
-
-	module.exports = {
-		"dark_sky": "61ae0da07a6ba575cf52b3a183bbcbbd",
-		"gmaps": "AIzaSyCaXnRt4J82cRuseQR98IngQJRyMJCPnWw",
-		"nyt": "3060d0e08cb9494f8ff10db9461552f6",
-		"google_clientId": "447160699625-cuvgvmtcfpl1c1jehq9dntcd1sgomi3g.apps.googleusercontent.com",
-		"google_clientSecret": "1dhLvo_grF0yCM_XVM8OyogN",
-		"google_apiKey": "AIzaSyCaXnRt4J82cRuseQR98IngQJRyMJCPnWw",
-		"dropbox_clientId": "dg3od5r6l2xuy1a",
-		"dropbox_clientSecret": "1at9hla0qjies73",
-		"jwtSecret": "cNWBAsajXfBhbFZ0sQsGfQVkIlzslJh5WEmOEDOts421O7AvEsVfyVuihTb",
-		"scoutWebServerSecret": "sSkCNyf93qA5ZNG9GHbBDFTMLrWx9DMjRodCN9oFb90hicys06zj8lmxbbvA",
-		"scoutWebSessionKey": "CtBjTxYgz6cMCeaMXNYFrfGa5WTcQwgNs7C0T2JYEzcURmzXuwMXUc1e8IRptHkBKDHTR0rTvllNBxhP"
-	};
-
-/***/ },
+/* 11 */,
 /* 12 */
 /*!*****************************!*\
   !*** ./server/infra/net.js ***!
@@ -528,7 +503,7 @@ require("source-map-support").install();
 	
 	// We do this here instead of in scout-service because we cannot pass JWT to
 	
-	var _crypto = __webpack_require__(/*! crypto */ 16);
+	var _crypto = __webpack_require__(/*! crypto */ 15);
 	
 	var _crypto2 = _interopRequireDefault(_crypto);
 	
@@ -540,11 +515,11 @@ require("source-map-support").install();
 	
 	var _googleapis2 = _interopRequireDefault(_googleapis);
 	
-	var _queryString = __webpack_require__(/*! query-string */ 17);
+	var _queryString = __webpack_require__(/*! query-string */ 16);
 	
 	var _queryString2 = _interopRequireDefault(_queryString);
 	
-	var _request = __webpack_require__(/*! request */ 19);
+	var _request = __webpack_require__(/*! request */ 17);
 	
 	var _request2 = _interopRequireDefault(_request);
 	
@@ -738,8 +713,7 @@ require("source-map-support").install();
 	exports.default = router;
 
 /***/ },
-/* 15 */,
-/* 16 */
+/* 15 */
 /*!*************************!*\
   !*** external "crypto" ***!
   \*************************/
@@ -748,7 +722,7 @@ require("source-map-support").install();
 	module.exports = require("crypto");
 
 /***/ },
-/* 17 */
+/* 16 */
 /*!*******************************!*\
   !*** external "query-string" ***!
   \*******************************/
@@ -757,8 +731,7 @@ require("source-map-support").install();
 	module.exports = require("query-string");
 
 /***/ },
-/* 18 */,
-/* 19 */
+/* 17 */
 /*!**************************!*\
   !*** external "request" ***!
   \**************************/

@@ -14,6 +14,12 @@ fs.readdirSync('node_modules')
     nodeModules[mod] = 'commonjs ' + mod;
   });
 
+var env = {};
+if (process.env.NODE_ENV === 'production' ||
+    process.env.NODE_ENV === 'development') {
+  env = { AUTH_KEYS: JSON.stringify(require('./keys/keys.json')) };
+}
+
 module.exports = {
   entry: './server/index.js',
   target: 'node',
@@ -41,6 +47,7 @@ module.exports = {
   },
   externals: nodeModules,
   plugins: [
+    new webpack.DefinePlugin(env),
     new webpack.IgnorePlugin(/\.(css|less)$/),
     new webpack.BannerPlugin('require("source-map-support").install();',
                              { raw: true, entryOnly: false })
