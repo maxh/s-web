@@ -6,9 +6,9 @@
   "scripts": {
     "start": "npm run server",
     "start-dev": "concurrently \"npm run server-dev\" \"npm run client\"",
-    "server": "node build/server.js",
-    "server-dev": "nodemon --inspect build/server.js",
-    "client": "node start-client.js",
+    "server": "node ./build/server.js",
+    "server-dev": "nodemon --inspect ./build/server.js",
+    "client": "node ./start-client.js",
     "build-server": "webpack -d --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "node_modules/.bin/eslint server/* client/src/* --quiet || true",
