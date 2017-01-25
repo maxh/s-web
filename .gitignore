@@ -7,8 +7,8 @@ node_modules
 coverage
 
 # production
-!client/build
 build
+!client/build
 
 # secrets
 keys
