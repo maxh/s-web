@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run server",
+    "start": "webpack -p && npm run server",
     "start-dev": "concurrently \"npm run server-dev\" \"npm run client\"",
     "server": "node ./build/server.js",
     "server-dev": "nodemon --inspect ./build/server.js",
