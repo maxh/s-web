@@ -87,6 +87,7 @@ class DropboxDetail extends Component {
     this.state = { enabled: Boolean(props.granted) };
     this.setPermission = this.setPermission.bind(this);
     this.toggleEnabled = this.toggleEnabled.bind(this);
+    this.initialEnabled = this.state.enabled;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -107,7 +108,7 @@ class DropboxDetail extends Component {
         <ControlLabel>Dropbox</ControlLabel>
         <Checkbox
           checked={this.state.enabled}
-          disabled={this.state.enabled}
+          disabled={this.initialEnabled}
           onChange={this.toggleEnabled}
         >
           Scout has access
