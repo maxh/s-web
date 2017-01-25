@@ -14,9 +14,9 @@ fs.readdirSync('node_modules')
     nodeModules[mod] = 'commonjs ' + mod;
   });
 
+const isDev = !(process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging');
 var env = {};
-if (process.env.NODE_ENV === 'production' ||
-    process.env.NODE_ENV === 'development') {
+if (isDev) {
   env = { AUTH_KEYS: JSON.stringify(require('./keys/keys.json')) };
 }
 
