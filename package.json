@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build-prod-client && npm run build-prod-server && npm run server-prod",
+    "start": "npm run build-prod-server && npm run server-prod",
     "start-dev": "concurrently \"npm run server-dev\" \"npm run client\"",
     "server": "node ./build/server.js",
     "server-dev": "nodemon --inspect ./build/server.js",
