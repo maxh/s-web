@@ -1,7 +1,7 @@
 import settings from '../settings';
 
 
-if (process.env.AUTH_KEYS) {
+if (settings.isHeroku) {
   settings.keys = JSON.parse(process.env.AUTH_KEYS);
 } else {
   // eslint-disable-next-line global-require
