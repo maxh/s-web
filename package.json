@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run server",
     "start-dev": "concurrently \"npm run server-dev\" \"npm run client\"",
-    "server": "nodemon build/server.js",
+    "server": "node build/server.js",
     "server-dev": "nodemon --inspect build/server.js",
     "client": "node start-client.js",
     "build-server": "webpack -d --watch",
