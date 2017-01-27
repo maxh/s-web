@@ -10,7 +10,7 @@
     "server-dev": "nodemon --inspect ./build/server.js",
     "server-prod": "NODE_ENV=production node ./build/server.js",
     "client": "node ./run-client.js --command=start",
-    "build-prod-client": "node ./run-client.js --command='run build' --env=production --port=80",
+    "build-prod-client": "node ./run-client.js --command='run build'",
     "build-prod-server": "webpack -p",
     "build-server": "webpack -d --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
