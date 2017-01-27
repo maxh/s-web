@@ -1,7 +1,7 @@
 const settings = {};
 
 settings.isDev = !(process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging');
-settings.isHeroku = process.env.PORT;
+settings.isHeroku = Boolean(process.env.PORT);
 
 if (settings.isDev) {
   settings.port = 3001;
